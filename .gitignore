@@ -1,6 +1,6 @@
-/[0-9]/
-/[0-9].txt
-/[0-9].bak
+[0-9]
+[0-9].txt
+[0-9].bak
 _vim/cscope.in0
 _vim/cscope.in1
 _vim/cscope.in2

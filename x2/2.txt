@@ -1,0 +1,254 @@
+
+wget -q -O - http://127.0.0.1:2018/config/ |json_pp -json_opt pretty,canonical
+{
+   "admin" : {
+      "config" : {
+         "persist" : false
+      },
+      "disabled" : false,
+      "enforce_origin" : false,
+      "listen" : "127.0.0.1:2018",
+      "origins" : [
+         "127.0.0.1:2018"
+      ]
+   },
+   "apps" : {
+      "http" : {
+         "http_port" : 80,
+         "https_port" : 443,
+         "servers" : {
+            "jjj123.com" : {
+               "errors" : {
+                  "routes" : [
+                     {
+                        "handle" : [
+                           {
+                              "body" : "ipx2_error_static_response",
+                              "handler" : "static_response"
+                           }
+                        ],
+                        "match" : [
+                           {
+                              "host" : [
+                                 "ipx2.jjj123.com"
+                              ]
+                           }
+                        ],
+                        "terminal" : true
+                     },
+                     {
+                        "handle" : [
+                           {
+                              "body" : "72718181_unknown",
+                              "handler" : "static_response"
+                           }
+                        ],
+                        "terminal" : true
+                     }
+                  ]
+               },
+               "listen" : [
+                  "0.0.0.0:443"
+               ],
+               "logs" : {
+                  "skip_hosts" : [
+                     "ip.jjj123.com",
+                     "ak2.jjj123.com",
+                     "ak3.jjj123.com",
+                     "ak4.jjj123.com"
+                  ],
+                  "skip_unmapped_hosts" : false
+               },
+               "routes" : [
+                  {
+                     "handle" : [
+                        {
+                           "handler" : "headers",
+                           "response" : {
+                              "set" : {
+                                 "Server" : [
+                                    "ipip"
+                                 ]
+                              }
+                           }
+                        },
+                        {
+                           "delimiters" : [
+                              "{{",
+                              "}}"
+                           ],
+                           "file_root" : "/doc",
+                           "handler" : "templates"
+                        },
+                        {
+                           "browse" : {},
+                           "handler" : "file_server",
+                           "root" : "ipip/"
+                        }
+                     ],
+                     "match" : [
+                        {
+                           "host" : [
+                              "ip.jjj123.com",
+                              "ak2.jjj123.com",
+                              "ak3.jjj123.com",
+                              "ak4.jjj123.com"
+                           ]
+                        }
+                     ]
+                  },
+                  {
+                     "handle" : [
+                        {
+                           "handler" : "headers",
+                           "response" : {
+                              "set" : {
+                                 "Server" : [
+                                    "ipx(1)"
+                                 ]
+                              }
+                           }
+                        },
+                        {
+                           "delimiters" : [
+                              "{{",
+                              "}}"
+                           ],
+                           "file_root" : "/doc",
+                           "handler" : "templates"
+                        },
+                        {
+                           "browse" : {},
+                           "handler" : "file_server",
+                           "root" : "src/"
+                        }
+                     ],
+                     "match" : [
+                        {
+                           "host" : [
+                              "ipx.jjj123.com"
+                           ]
+                        }
+                     ]
+                  },
+                  {
+                     "handle" : [
+                        {
+                           "handler" : "subroute",
+                           "routes" : [
+                              {
+                                 "handle" : [
+                                    {
+                                       "handler" : "headers",
+                                       "response" : {
+                                          "set" : {
+                                             "Server" : [
+                                                "ipx2001_example"
+                                             ]
+                                          }
+                                       }
+                                    },
+                                    {
+                                       "handler" : "reverse_proxy",
+                                       "headers" : {
+                                          "request" : {
+                                             "set" : {
+                                                "host" : [
+                                                   "{example.com:443}"
+                                                ]
+                                             }
+                                          }
+                                       },
+                                       "transport" : {
+                                          "dial_fallback_delay" : "10s",
+                                          "dial_timeout" : "10s",
+                                          "expect_continue_timeout" : "10s",
+                                          "max_conns_per_host" : 10,
+                                          "protocol" : "http",
+                                          "response_header_timeout" : "10s",
+                                          "tls" : {
+                                             "handshake_timeout" : "10s"
+                                          }
+                                       },
+                                       "upstreams" : [
+                                          {
+                                             "dial" : "example.com:443",
+                                             "max_requests" : 1
+                                          }
+                                       ]
+                                    }
+                                 ],
+                                 "match" : [
+                                    {
+                                       "path" : [
+                                          "/example/"
+                                       ]
+                                    }
+                                 ],
+                                 "terminal" : false
+                              }
+                           ]
+                        },
+                        {
+                           "handler" : "headers",
+                           "response" : {
+                              "set" : {
+                                 "Server" : [
+                                    "ipx2001"
+                                 ]
+                              }
+                           }
+                        },
+                        {
+                           "handler" : "reverse_proxy",
+                           "headers" : {
+                              "request" : {
+                                 "set" : {
+                                    "host" : [
+                                       "{github.com:443}"
+                                    ]
+                                 }
+                              }
+                           },
+                           "transport" : {
+                              "dial_fallback_delay" : "10s",
+                              "dial_timeout" : "10s",
+                              "expect_continue_timeout" : "10s",
+                              "max_conns_per_host" : 10,
+                              "protocol" : "http",
+                              "response_header_timeout" : "10s",
+                              "tls" : {
+                                 "handshake_timeout" : "10s"
+                              }
+                           },
+                           "upstreams" : [
+                              {
+                                 "dial" : "github.com:443",
+                                 "max_requests" : 1
+                              }
+                           ]
+                        }
+                     ],
+                     "match" : [
+                        {
+                           "host" : [
+                              "ipx2.jjj123.com"
+                           ]
+                        }
+                     ],
+                     "terminal" : false
+                  }
+               ]
+            }
+         }
+      }
+   },
+   "logging" : {
+      "logs" : {
+         "log001" : {
+            "level" : "DEBUG"
+         }
+      }
+   }
+}
+
